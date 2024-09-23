@@ -1,0 +1,113 @@
+---
+title: "Assignment_QMM_LP"
+author: "Samiha"
+date: "2024-09-21"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+                              
+**Solving LP Using R**
+                                
+                              
+In this problem, the objective is to maximize profit for the Weigelt Corporation by determining the optimal production quantities of large, medium, and small product sizes across three plants. The objective function, subject to various constraints on production capacity, storage space, sales forecasts, and proportional capacity usage, aims to maximize total profit.
+
+In addition,to solve the problem we need to define the objective, constraints and direction
+
+**Objective Function:**
+$$ \text{The Objective function is to } Max \hspace{.3cm} Z = 420 (P1L+P2L+P3L) + 360 (P1M+P2M+P3M) + 300 (P1S+P2S+P3S) $$
+
+**Subject to the following constraints:**
+
+$$P1L+P1M+P1S \le 750 $$
+$$ P2L+P2M+P2S \le 900 $$
+$$ P3L+P3M+P3S \le 450 $$
+$$ 20P1L+15P1M+12P1S \le 13000 $$
+$$ 20P2L+15P2M+12P2S \le 12000 $$
+$$ 20P3L+15P3M+12P3S \le 5000 $$
+$$ P1L+P2L+P3L \le 900 $$
+$$ P1M+P2M+P3M \le 1200 $$
+$$ P1S+P2S+P3S \le 750 $$
+**Non Negativity Constraints:**
+$$ P1L,P2L,P3L,P1M,P2M,P3M,P1S,P2S,P3S \ge 0 $$
+**Equal percentage of capacity usage constraint**
+$$ \frac{P1L+P1M+P1S}{750}=\frac{P2L+P2M+P2S}{900}=\frac{P3L+P3M+P3S}{450}$$
+
+
+The maximum profit obtained through the LP model was $ 696000 , with optimal production plan for each size across the plants, Plant 1: 517 large, 178 medium, 0 small units,Plant 2: 667 large, 167 medium, 0 small units and Plant 3: 417 large, 0 medium, 0 small units. These recommendations are essential for management's decision-making, as they ensure efficient utilization of resources and help minimize potential layoffs.
+
+\newpage
+
+Loading required libraries
+```{r}
+library(lpSolve)
+```
+
+
+Writing down the objective function 
+```{r}
+f.obj<- c(420, 360, 300,   
+          420, 360, 300,   
+          420, 360, 300)   
+```
+
+Setting constraints
+```{r}
+f.con <- matrix(c(
+  1, 1, 1, 0, 0, 0, 0, 0, 0,   
+  0, 0, 0, 1, 1, 1, 0, 0, 0,  
+  0, 0, 0, 0, 0, 0, 1, 1, 1,   
+  20, 15, 12, 0, 0, 0, 0, 0, 0, 
+  0, 0, 0, 20, 15, 12, 0, 0, 0,   
+  0, 0, 0, 0, 0, 0, 20, 15, 12,   
+  1, 0, 0, 1, 0, 0, 1, 0, 0,   
+  0, 1, 0, 0, 1, 0, 0, 1, 0,   
+  0, 0, 1, 0, 0, 1, 0, 0, 1,
+  900, 900, 900, -750, -750, -750, 0, 0, 0,   
+  0, 0, 0, 450, 450, 450, -900, -900, -900 
+), nrow = 11, byrow = TRUE)
+```
+
+Set inequality signs
+```{r}
+f.dir <- c("<=", "<=", "<=",
+           "<=", "<=", "<=",
+           "<=", "<=", "<=",
+            "=", "=")
+```
+
+
+Set right hand side coefficients
+```{r}
+rhs <- c(750, 900, 450,    
+         13000, 12000, 5000,
+         900, 1200, 750,0,0)
+```
+
+Using the lp function to solve the problem 
+```{r}
+solution<-lp("max",f.obj,f.con,f.dir,rhs)
+```
+
+
+Get the value of the objective function (maximum profit)
+```{r}
+max_profit <- solution$objval
+
+# Print the maximum profit
+cat("Maximum Profit: ", max_profit, "\n")
+```
+
+Using lp function again to get the values for the variables 
+```{r}
+lp("max",f.obj,f.con,f.dir,rhs)$solution
+```
+
+
+
+
+
